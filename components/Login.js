@@ -10,6 +10,7 @@ import LoginContract from '../contracts/LoginContract';
 import { WebView } from 'react-native-webview';
 // import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { SelectList } from 'react-native-dropdown-select-list'
 
 
 const Login = ({ navigation }) => {
@@ -19,6 +20,7 @@ const Login = ({ navigation }) => {
     const [kullaniciAdi, setKullaniciAdi] = useState('');
     const [kullaniciSifre, setKullaniciSifre] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = React.useState("");
   
     const handleLogin = () => {
         if (hesapKodu && kullaniciAdi && kullaniciSifre) {
@@ -99,7 +101,12 @@ const Login = ({ navigation }) => {
             path:require('../assets/selcukecza.png'),
         }
     }
-  
+    
+    const languageData = [
+      {key:"tr",value:"Türkçe"},
+      {key:"en",value:"English"}
+    ]
+
     return (
       <View style={styles.container}>
         <Image
@@ -107,13 +114,25 @@ const Login = ({ navigation }) => {
         <Text style={styles.title}>{texts[language].title}</Text>
   
         <View style={styles.languagePicker}>
-          <Picker
+          <SelectList 
+          onSelect={()=>{setLanguage(selected)}}
+          setSelected={(val)=>setSelected(val)}
+          fontFamily='lato'
+          data={languageData}
+          arrowicon={<Icon name="chevron-down" size={12} color={'black'} />} 
+          searchicon={<Icon name="search" size={12} color={'black'} />}
+          search={false} 
+          boxStyles={{borderRadius:0}}
+          defaultOption={languageData[0]}
+          />
+          {/* <Picker
             selectedValue={language}
+            mode='dropdown'
             onValueChange={(itemValue) => setLanguage(itemValue)}
           >
             <Picker.Item label="Türkçe" value="tr" />
             <Picker.Item label="English" value="en" />
-          </Picker>
+          </Picker> */}
         </View>
   
         <View style={styles.inputContainer}>
@@ -195,6 +214,7 @@ const Login = ({ navigation }) => {
       borderRadius: 5,
       marginBottom: 20,
       overflow: 'hidden',
+      
     },
     inputContainer: {
       flexDirection: 'row',

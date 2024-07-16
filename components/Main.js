@@ -7,6 +7,7 @@ import * as Device from 'expo-device';
 import md5 from 'md5';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import {  SafeAreaView } from 'react-native-safe-area-context';
 
 const Main = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -18,10 +19,13 @@ const Main = ({ navigation }) => {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [scannedData, setScannedData] = useState('');
   const [webViewUri, setWebViewUri] = useState('');
-  // const [webViewUri, setWebViewUri] = useState('https://webdepo.selcukecza.com.tr');
   const [permission, requestPermission] = useCameraPermissions();
 
+  const webViewRef = useRef(null);
+
+  
   useEffect(() => {
+
     console.log("useEffect tetiklendi");
     const loadSettings = async () => {
       const androidId = Device.osInternalBuildId;
@@ -42,8 +46,8 @@ const Main = ({ navigation }) => {
       await setLoginURL(_LOGINURL);
       await setWebdepoURL(_WEBDEPOURL);
       await setParams('?DeviceId=' + androidId + '&AppType=4&EczaneKodu=' + hesapKodu + '&KullaniciAdi=' + kullaniciAdi + '&Sifre=' + kullaniciSifre);
-      await setWebViewUri(_LOGINURL + params);
-      webViewRef.current.reload(); // Assuming webViewRef is declared correctly elsewhere
+      // await setWebViewUri(_LOGINURL + params);
+      // webViewRef.current.reload(); // Assuming webViewRef is declared correctly elsewhere
 
       // console.log("param nedir ? = " + params);
       // console.log('_LOGINURL:' + _LOGINURL);
@@ -57,10 +61,19 @@ const Main = ({ navigation }) => {
 
     console.log('web view izin varmı bakacak:' + loginURL + params);
 
-    if (permission && permission.granted) {
-      loadSettings();
+    // if (permission && permission.granted) {
+    loadSettings();
+    // }
+  }, []); // Only reload settings when permission changes permission,requestPermission,
+
+  useEffect(() => {
+    if (loginURL && params) {
+      setWebViewUri(loginURL + params);
+      if (webViewRef.current) {
+        webViewRef.current.reload();
+      }
     }
-  }, [permission]); // Only reload settings when permission changes
+  }, [loginURL, params]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -87,7 +100,6 @@ const Main = ({ navigation }) => {
     }, [])
   );
 
-  const webViewRef = useRef(null);
 
   const handleRefresh = () => {
     if (showError) {
@@ -107,7 +119,7 @@ const Main = ({ navigation }) => {
   const handleAbout = () => {
     Alert.alert(
       'Boyut Bilgisayar',
-      'Boyut Bilgisayar 2016\nv1.0',
+      'Boyut Bilgisayar 2024\nv1.0',
       [{ text: 'Tamam', style: 'default' }],
       { cancelable: true }
     );
@@ -151,7 +163,24 @@ const Main = ({ navigation }) => {
     }
   };
 
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+  
+
   return (
+    <SafeAreaView style={styles.safeArea}>
     <View style={styles.container}>
       {loading && <ActivityIndicator size="large" />}
       {showError && (
@@ -187,7 +216,7 @@ const Main = ({ navigation }) => {
       <Modal
         visible={menuVisible}
         transparent={true}
-        animationType='slide-down'
+        animationType='none'//'slide-down'
         onRequestClose={() => setMenuVisible(false)}
       >
         <TouchableOpacity style={styles.modalContainer} onPress={() => setMenuVisible(false)}>
@@ -222,10 +251,14 @@ const Main = ({ navigation }) => {
         </CameraView>
       </Modal>
     </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea:{
+    flex:1
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -237,7 +270,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10,
-    marginTop: StatusBar.currentHeight,
+    // marginTop: StatusBar.currentHeight,
     backgroundColor: '#289af7',
     color: '#fff'
   },
