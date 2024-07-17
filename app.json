@@ -10,17 +10,13 @@
         }
       ]
     ],
-    "name": "selcuk-webdepo-mobil",
+    "name": "Selcuk Ecza Webdepo",
     "slug": "selcuk-webdepo-mobil",
     "version": "1.0.0",
     "sdkVersion": "51.0.0",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios","android","web"],
     "orientation": "portrait",
-    "icon": "./assets/selcukecza.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -29,6 +25,11 @@
     },
     "ios": {
       "supportsTablet": true,
+      "splash": {
+        "image": ".assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      },
       "infoPlist": {
         "NSCameraUsageDescription": "We need access to your camera to scan QR codes."
       },
@@ -36,7 +37,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/selcukecza.png",
+        "foregroundImage": "./assets/adaptive-Icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -47,7 +48,7 @@
       "package": "com.boyut.selcukwebdepomobil"
     },
     "web": {
-      "favicon": "./assets/selcukecza.png"
+      "favicon": "./assets/icon.png"
     },
     "extra": {
       "eas": {

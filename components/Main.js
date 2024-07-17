@@ -7,7 +7,7 @@ import * as Device from 'expo-device';
 import md5 from 'md5';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import {  SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Main = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -20,10 +20,12 @@ const Main = ({ navigation }) => {
   const [scannedData, setScannedData] = useState('');
   const [webViewUri, setWebViewUri] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
+  const [redirect, setRedirect] = useState(false);
+  const [redirectlink, setRedirectLink] = useState('');
 
   const webViewRef = useRef(null);
 
-  
+
   useEffect(() => {
 
     console.log("useEffect tetiklendi");
@@ -34,29 +36,25 @@ const Main = ({ navigation }) => {
       let kullaniciSifre = await AsyncStorage.getItem('kullanicisifre');
       const storedLoginContract = await AsyncStorage.getItem('loginContract');
       const loginContract = storedLoginContract ? JSON.parse(storedLoginContract) : {};
+      const _redirect = await AsyncStorage.getItem('redirect');
+      const _redirectlink = await AsyncStorage.getItem('redirectlink');
 
-      console.log("loginContract : " + loginContract);
+      await setRedirect(_redirect === 'true');
+      await setRedirectLink(_redirectlink);
 
       if (kullaniciSifre) {
         kullaniciSifre = md5(kullaniciSifre.toUpperCase()); // Convert to uppercase
       }
 
-      const { _LOGINURL, _WEBDEPOURL } = loginContract;
+      if (!_redirect !== 'true' && kullaniciAdi) {
+        console.log("redirect değil ve girdi");
+        console.log('kullaniciAdi:' + kullaniciAdi);
+        const { _LOGINURL, _WEBDEPOURL } = loginContract;
+        await setLoginURL(_LOGINURL);
+        await setWebdepoURL(_WEBDEPOURL);
+        await setParams('?DeviceId=' + androidId + '&AppType=4&EczaneKodu=' + hesapKodu + '&KullaniciAdi=' + kullaniciAdi + '&Sifre=' + kullaniciSifre);
+      }
 
-      await setLoginURL(_LOGINURL);
-      await setWebdepoURL(_WEBDEPOURL);
-      await setParams('?DeviceId=' + androidId + '&AppType=4&EczaneKodu=' + hesapKodu + '&KullaniciAdi=' + kullaniciAdi + '&Sifre=' + kullaniciSifre);
-      // await setWebViewUri(_LOGINURL + params);
-      // webViewRef.current.reload(); // Assuming webViewRef is declared correctly elsewhere
-
-      // console.log("param nedir ? = " + params);
-      // console.log('_LOGINURL:' + _LOGINURL);
-      // console.log('_WEBDEPOURL' + _WEBDEPOURL);
-      // console.log('hesapKodu' + hesapKodu);
-      // console.log('androidId' + androidId);
-      // console.log('kullaniciAdi' + kullaniciAdi);
-      // console.log('kullaniciSifre' + kullaniciSifre);
-      // console.log('login+paras' + loginURL + params);
     };
 
     console.log('web view izin varmı bakacak:' + loginURL + params);
@@ -67,13 +65,24 @@ const Main = ({ navigation }) => {
   }, []); // Only reload settings when permission changes permission,requestPermission,
 
   useEffect(() => {
-    if (loginURL && params) {
+    console.log("ikinci sycle da:" + redirectlink);
+    console.log("kinci sycle da redirect:" + (redirect ? "true" : "false"));
+    console.log("redirecti yaz:" + redirect)
+    console.log("aaaaa"+(loginURL && params && !redirect));
+    if (loginURL && params && !redirect) {
+      console.log("loginURL && params && !redirect");
       setWebViewUri(loginURL + params);
       if (webViewRef.current) {
         webViewRef.current.reload();
       }
+    } else if (redirect && redirectlink !== "") {
+      console.log("redirect && redirectlink");
+      setWebViewUri(redirectlink);
+      if (webViewRef.current) {
+        webViewRef.current.reload();
+      }
     }
-  }, [loginURL, params]);
+  }, [loginURL, params,redirect, redirectlink]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -113,6 +122,11 @@ const Main = ({ navigation }) => {
     await AsyncStorage.removeItem('hesapkodu');
     await AsyncStorage.removeItem('kullaniciadi');
     await AsyncStorage.removeItem('kullanicisifre');
+    await AsyncStorage.removeItem('redirect');
+    await AsyncStorage.removeItem('redirectlink');
+    await setWebViewUri("https://webdepo.selcukecza.com.tr/SignOut.aspx");
+    await webViewRef.current.reload();
+
     navigation.dispatch(StackActions.replace('Login'));
   };
 
@@ -177,87 +191,90 @@ const Main = ({ navigation }) => {
       </View>
     );
   }
-  
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
-    <View style={styles.container}>
-      {loading && <ActivityIndicator size="large" />}
-      {showError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Bir hata oluştu. Lütfen tekrar deneyin.</Text>
-          <Button title="Yenile" onPress={handleRefresh} />
+      <View style={styles.container}>
+        {loading && <ActivityIndicator size="large" />}
+        {showError && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Bir hata oluştu. Lütfen tekrar deneyin.</Text>
+            <Button title="Yenile" onPress={handleRefresh} />
+          </View>
+        )}
+
+        <View style={styles.menu}>
+          <Text style={styles.title}>Selçuk Webdepo</Text>
+          <TouchableOpacity onPress={() => setQrModalVisible(true)} style={styles.qrButton}>
+            <Image source={require('../assets/scanner48.png')} style={styles.qrIcon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuIcon}>
+            <Ionicons name="ellipsis-vertical" size={24} color="white" />
+          </TouchableOpacity>
         </View>
-      )}
 
-      <View style={styles.menu}>
-        <Text style={styles.title}>Selçuk Webdepo</Text>
-        <TouchableOpacity onPress={() => setQrModalVisible(true)} style={styles.qrButton}>
-          <Image source={require('../assets/scanner48.png')} style={styles.qrIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuIcon}>
-          <Ionicons name="ellipsis-vertical" size={24} color="white" />
-        </TouchableOpacity>
+        <WebView
+          ref={webViewRef}
+          originWhitelist={['*']}
+          source={{ uri: webViewUri }}
+          onLoadStart={() => setLoading(true)}
+          onLoadEnd={() => setLoading(false)}
+          onError={() => {
+            setLoading(false);
+            setShowError(true);
+          }}
+          style={styles.webView}
+        />
+
+        <Modal
+          visible={menuVisible}
+          transparent={true}
+          animationType='none'//'slide-down'
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <TouchableOpacity style={styles.modalContainer} onPress={() => setMenuVisible(false)}>
+            <View style={styles.modal}>
+              <TouchableOpacity style={styles.menuItem} onPress={handleRefresh}>
+                <Text>Yenile</Text>
+              </TouchableOpacity>
+              
+                <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                  <Text>Oturumu Kapat</Text>
+                </TouchableOpacity>
+             
+              <TouchableOpacity style={styles.menuItem} onPress={handleAbout}>
+                <Text>Hakkında</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
+                <Text style={styles.closeButtonText}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        <Modal
+          visible={qrModalVisible}
+          transparent={false}
+          onRequestClose={() => setQrModalVisible(false)}
+        >
+          <CameraView style={styles.camera} flash='on' onBarcodeScanned={scannedData ? undefined : handleBarCodeScanned}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={() => setScannedData(false)}>
+                <Text>Scan Barcode</Text>
+              </TouchableOpacity>
+            </View>
+          </CameraView>
+        </Modal>
       </View>
-
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ uri: webViewUri }}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setShowError(true);
-        }}
-        style={styles.webView}
-      />
-
-      <Modal
-        visible={menuVisible}
-        transparent={true}
-        animationType='none'//'slide-down'
-        onRequestClose={() => setMenuVisible(false)}
-      >
-        <TouchableOpacity style={styles.modalContainer} onPress={() => setMenuVisible(false)}>
-          <View style={styles.modal}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleRefresh}>
-              <Text>Yenile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Text>Oturumu Kapat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleAbout}>
-              <Text>Hakkında</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
-              <Text style={styles.closeButtonText}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      <Modal
-        visible={qrModalVisible}
-        transparent={false}
-        onRequestClose={() => setQrModalVisible(false)}
-      >
-        <CameraView style={styles.camera} flash='on' onBarcodeScanned={scannedData ? undefined : handleBarCodeScanned}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => setScannedData(false)}>
-              <Text>Scan Barcode</Text>
-            </TouchableOpacity>
-          </View>
-        </CameraView>
-      </Modal>
-    </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea:{
-    flex:1
+  safeArea: {
+    flex: 1
   },
   container: {
     flex: 1,

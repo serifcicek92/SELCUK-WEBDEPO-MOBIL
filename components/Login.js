@@ -21,6 +21,7 @@ const Login = ({ navigation }) => {
     const [kullaniciSifre, setKullaniciSifre] = useState('');
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = React.useState("");
+    const [digerButonLink,setDigerButonLink] = useState("");
   
     const handleLogin = () => {
         if (hesapKodu && kullaniciAdi && kullaniciSifre) {
@@ -55,23 +56,31 @@ const Login = ({ navigation }) => {
   
     const handleForgotPassword = () => {
       // Şifremi unuttum işlemleri burada yapılacak
+      AsyncStorage.setItem('redirect', 'true');
+      AsyncStorage.setItem('redirectlink', 'https://webdepo.selcukecza.com.tr/SifremiUnuttum.aspx');
       console.log('Forgot Password');
+      navigation.replace('Main');
     };
   
     const handleUserGuide = () => {
-      // Kullanım kılavuzu işlemleri burada yapılacak
+      AsyncStorage.setItem('redirect', 'true');
+      AsyncStorage.setItem('redirectlink', 'chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://webdepo.selcukecza.com.tr/WebDepoKK.pdf');
       console.log('User Guide');
+      navigation.replace('Main');
     };
   
     const handleSalesmanLogin = () => {
+      AsyncStorage.setItem('redirect', 'true');
+      AsyncStorage.setItem('redirectlink', 'https://webdepo.selcukecza.com.tr/AdminLogin.aspx');
       // Plasiyer girişi işlemleri burada yapılacak
       console.log('Salesman Login');
+      navigation.replace('Main');
     };
     
 
     const texts = {
       tr: {
-        title: 'Selçuk Ecza Webdepo Login Form',
+        title: 'Selçuk Ecza Webdepo Kullanıcı Girişi',
         login: 'Giriş',
         forgotPassword: 'Şifremi Unuttum',
         userGuide: 'Kullanım Kılavuzu',
@@ -83,7 +92,7 @@ const Login = ({ navigation }) => {
         pleasefillspace : 'Lütfen tüm alanları doldurun.',
       },
       en: {
-        title: 'Selçuk Ecza Webdepo Login Form',
+        title: 'Selçuk Ecza Webdepo User Login',
         login: 'Login',
         forgotPassword: 'Forgot Password',
         userGuide: 'User Guide',
@@ -98,7 +107,7 @@ const Login = ({ navigation }) => {
 
     const logos = {
         selcuk :{
-            path:require('../assets/selcukecza.png'),
+            path:require('../assets/selcukecza-72x72.png'),
         }
     }
     
@@ -117,7 +126,7 @@ const Login = ({ navigation }) => {
           <SelectList 
           onSelect={()=>{setLanguage(selected)}}
           setSelected={(val)=>setSelected(val)}
-          fontFamily='lato'
+          //fontFamily='lato'
           data={languageData}
           arrowicon={<Icon name="chevron-down" size={12} color={'black'} />} 
           searchicon={<Icon name="search" size={12} color={'black'} />}
@@ -182,9 +191,9 @@ const Login = ({ navigation }) => {
           <TouchableOpacity style={styles.footerButtonRed} onPress={handleForgotPassword}>
             <Text style={styles.footerButtonText}>{texts[language].forgotPassword}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.footerButtonYellow} onPress={handleUserGuide}>
+          {/* <TouchableOpacity style={styles.footerButtonYellow} onPress={handleUserGuide}>
             <Text style={styles.footerButtonText}>{texts[language].userGuide}</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.footerButtonBlue} onPress={handleSalesmanLogin}>
             <Text style={styles.footerButtonText}>{texts[language].salesmanLogin}</Text>
           </TouchableOpacity>
