@@ -194,9 +194,9 @@ const Login = ({ navigation }) => {
           {/* <TouchableOpacity style={styles.footerButtonYellow} onPress={handleUserGuide}>
             <Text style={styles.footerButtonText}>{texts[language].userGuide}</Text>
           </TouchableOpacity> */}
-          {/* <TouchableOpacity style={styles.footerButtonBlue} onPress={handleSalesmanLogin}>
+          <TouchableOpacity style={styles.footerButtonBlue} onPress={handleSalesmanLogin}>
             <Text style={styles.footerButtonText}>{texts[language].salesmanLogin}</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     );
