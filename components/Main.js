@@ -113,8 +113,9 @@ const Main = ({ navigation }) => {
   const handleRefresh = () => {
     if (showError) {
       setShowError(false);
-      setLoading(true); // Set loading state before showing WebView again
+      setLoading(true); 
     }
+    console.log("webviewuri refresh :" +webViewUri);
     webViewRef.current.reload();
   };
 
