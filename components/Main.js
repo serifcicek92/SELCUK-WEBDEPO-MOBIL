@@ -30,7 +30,7 @@ const Main = ({ navigation }) => {
 
     console.log("useEffect tetiklendi");
     const loadSettings = async () => {
-      const androidId = Device.osInternalBuildId;
+      const androidId = await Device.osInternalBuildId;
       const hesapKodu = await AsyncStorage.getItem('hesapkodu');
       const kullaniciAdi = await AsyncStorage.getItem('kullaniciadi');
       let kullaniciSifre = await AsyncStorage.getItem('kullanicisifre');
@@ -43,7 +43,8 @@ const Main = ({ navigation }) => {
       await setRedirectLink(_redirectlink);
 
       if (kullaniciSifre) {
-        kullaniciSifre = md5(kullaniciSifre.toUpperCase()); // Convert to uppercase
+        kullaniciSifre = md5(kullaniciSifre).toUpperCase(); // Convert to uppercase
+        // kullaniciSifre = md5(kullaniciSifre.toUpperCase()); // Convert to uppercase
       }
 
       if (!_redirect !== 'true' && kullaniciAdi) {
@@ -53,6 +54,10 @@ const Main = ({ navigation }) => {
         await setLoginURL(_LOGINURL);
         await setWebdepoURL(_WEBDEPOURL);
         await setParams('?DeviceId=' + androidId + '&AppType=4&EczaneKodu=' + hesapKodu + '&KullaniciAdi=' + kullaniciAdi + '&Sifre=' + kullaniciSifre);
+
+        console.log("_LOGINURL"+_LOGINURL);
+        console.log("_WEBDEPOURL"+_WEBDEPOURL);
+        console.log("setParams"+params);
       }
 
     };
@@ -65,12 +70,13 @@ const Main = ({ navigation }) => {
   }, []); // Only reload settings when permission changes permission,requestPermission,
 
   useEffect(() => {
-    console.log("ikinci sycle da:" + redirectlink);
-    console.log("kinci sycle da redirect:" + (redirect ? "true" : "false"));
-    console.log("redirecti yaz:" + redirect)
-    console.log("aaaaa"+(loginURL && params && !redirect));
+    // console.log("ikinci sycle da:" + redirectlink);
+    // console.log("kinci sycle da redirect:" + (redirect ? "true" : "false"));
+    // console.log("redirecti yaz:" + redirect)
+    // console.log("aaaaa"+(loginURL && params && !redirect));
     if (loginURL && params && !redirect) {
       console.log("loginURL && params && !redirect");
+      console.log("loginURL + params:"+loginURL + params);
       setWebViewUri(loginURL + params);
       if (webViewRef.current) {
         webViewRef.current.reload();
@@ -82,7 +88,7 @@ const Main = ({ navigation }) => {
         webViewRef.current.reload();
       }
     }
-  }, [loginURL, params,redirect, redirectlink]);
+  }, [loginURL, params, redirect, redirectlink]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -192,8 +198,21 @@ const Main = ({ navigation }) => {
       </View>
     );
   }
-
-
+  const handleWebViewMessage = (event) => {
+    const data = event.nativeEvent.data;
+    // console.log("webview data"+data);
+    if (data.includes('Kullanıcı Adı Şifresi Yanlış')) {
+      Alert.alert('Hata', 'Kullanıcı adı veya şifre yanlış!');
+      handleLogout();
+    }
+  };
+  const injectJavaScript = `
+  (function() {
+    var htmlContent = document.documentElement.innerHTML;
+    window.ReactNativeWebView.postMessage(htmlContent);
+  })();
+  true;
+`;
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -225,6 +244,8 @@ const Main = ({ navigation }) => {
             setLoading(false);
             setShowError(true);
           }}
+          injectedJavaScript={injectJavaScript}
+          onMessage={handleWebViewMessage}
           style={styles.webView}
         />
 

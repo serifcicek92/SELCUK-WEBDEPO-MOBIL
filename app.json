@@ -12,7 +12,7 @@
     ],
     "name": "Selcuk Ecza Webdepo",
     "slug": "selcuk-webdepo-mobil",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "sdkVersion": "51.0.0",
     "platforms": ["ios","android","web"],
     "orientation": "portrait",

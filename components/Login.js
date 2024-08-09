@@ -25,20 +25,32 @@ const Login = ({ navigation }) => {
   const [selected, setSelected] = React.useState("");
   const [digerButonLink, setDigerButonLink] = useState("");
 
+  function isNull(value) {
+    return value === undefined || value === null;
+  }
+
   useEffect(() => {
     const loadUserData = async () => {
       const storedHesapKodu = await AsyncStorage.getItem('hesapkodu');
       const storedKullaniciAdi = await AsyncStorage.getItem('kullaniciadi');
       const storedKullaniciSifre = await AsyncStorage.getItem('kullanicisifre');
 
-      if (storedHesapKodu) await setHesapKodu(storedHesapKodu);
+      if (!isNull(storedHesapKodu)) await setHesapKodu(storedHesapKodu);
       if (storedKullaniciAdi) await setKullaniciAdi(storedKullaniciAdi);
       if (storedKullaniciSifre) await setKullaniciSifre(storedKullaniciSifre);
 
       await setLoading(false);
 
-      if (storedHesapKodu && storedKullaniciAdi && storedKullaniciSifre)
+      // if (storedHesapKodu && storedKullaniciAdi && storedKullaniciSifre)
+      //   handleLogin(storedHesapKodu, storedKullaniciAdi, storedKullaniciSifre);
+      
+      if (!isNull(storedHesapKodu) && !isNull(storedKullaniciAdi) && !isNull(storedKullaniciSifre)) {
+        // console.log("otomatik giriş1:" + storedHesapKodu);
+        // console.log("otomatik giriş2:" + storedKullaniciAdi);
+        // console.log("otomatik giriş3:" + storedKullaniciSifre);
         handleLogin(storedHesapKodu, storedKullaniciAdi, storedKullaniciSifre);
+      }
+
     };
 
     loadUserData();
@@ -46,7 +58,8 @@ const Login = ({ navigation }) => {
 
 
   const handleLogin = async (hesapKoduParam, kullaniciAdiParam, kullaniciSifreParam) => {
-    const kodu = hesapKoduParam || hesapKodu;
+    // const kodu = hesapKoduParam || hesapKodu;
+    const kodu = hesapKodu || hesapKoduParam;
     const adi = kullaniciAdiParam || kullaniciAdi;
     const sifre = kullaniciSifreParam || kullaniciSifre;
     console.log("hesapKodu:" + kodu);
@@ -75,7 +88,6 @@ const Login = ({ navigation }) => {
         await AsyncStorage.setItem('kullaniciadi', await adi);
         await AsyncStorage.setItem('kullanicisifre', await sifre);
         await AsyncStorage.setItem('loginContract', await JSON.stringify(loginContract));
-
         navigation.replace('Main');
       }, 2000);
     } else {
