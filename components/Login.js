@@ -160,6 +160,11 @@ const Login = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+    {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#007bff" />
+        </View>
+      )}
       <Image
         source={logos[depo].path} />
       <Text style={styles.title}>{texts[language].title}</Text>
@@ -240,6 +245,7 @@ const Login = ({ navigation }) => {
           <Text style={styles.footerButtonText}>{texts[language].salesmanLogin}</Text>
         </TouchableOpacity>
       </View>
+      <StatusBar style="auto" />
     </View>
   );
 };
@@ -340,6 +346,13 @@ const styles = StyleSheet.create({
   footerButtonText: {
     color: '#fff',
     fontSize: 14,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });
 export default Login;
